@@ -1,16 +1,32 @@
 import * as React from "react";
-import { Admin, Resource } from 'react-admin';
-import { PostList, PostEdit, PostCreate } from './posts';
-import { UserList } from './users';
-import jsonServerProvider from 'ra-data-json-server';
+import { Component } from "react";
+import buildGraphQLProvider from "ra-data-graphql-simple";
+import { Admin, ListGuesser, Resource } from "react-admin";
 
-const dataProvider = jsonServerProvider('https://jsonplaceholder.typicode.com');
+class App extends Component {
+  constructor() {
+    super();
+    this.state = { dataProvider: null };
+  }
+  componentDidMount() {
+    buildGraphQLProvider({
+      clientOptions: { uri: "https://graphqlzero.almansi.me/api" },
+    }).then((dataProvider) => this.setState({ dataProvider }));
+  }
 
-const App = () => (
-    <Admin dataProvider={dataProvider}>
-        <Resource name="posts" list={PostList} edit={PostEdit} create={PostCreate} />
-        <Resource name="users" list={UserList} />
-    </Admin>
-);
+  render() {
+    const { dataProvider } = this.state;
+
+    if (!dataProvider) {
+      return <div>Loading</div>;
+    }
+
+    return (
+      <Admin dataProvider={dataProvider}>
+        <Resource name="posts" list={ListGuesser} />
+      </Admin>
+    );
+  }
+}
 
 export default App;
